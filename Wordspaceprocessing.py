@@ -1,5 +1,6 @@
 '''
 '''
+import Costum_Filters
 
 import numpy as np
 from scipy.spatial import distance
@@ -15,29 +16,33 @@ class Wordspaceprocessing:
         self.WordLabels_npArray = WordLabels_npArray
         
         self.Wordlist_npArray = None
-        self.Wordlist_indexes_npArray = None
+        self.WordlistIndexes_npArray = None
+        
+        self.ExtraWords_npArray = None
+        
+        self.WordFilterValues_npArray = None
     
     
     def add_wordlist(self, DirectoryPath_str):
-        '''
-        '''
+        '''Assuming that the list of words is a .txt file 
+        with one word per line. '''
         
         
         Local_Wordlist_list = []
-        raw = open(DirectoryPath_str)
+        raw_file = open(DirectoryPath_str)
         
-        for line_str in raw:
+        for line_str in raw_file:
             Local_Wordlist_list.append(line_str.split()[0])
         
-        raw.close()
+        raw_file.close()
         
         self.Wordlist_npArray = np.array(Local_Wordlist_list)
         self.index_finder()
     
     
     def index_finder(self):
-        '''Method that finds the indexes of the vectors from wordlist
-        '''
+        '''Method that finds the indexes of the vectors 
+        from wordlist. '''
     
         
         Indexes_npArray = np.zeros(len(self.Wordlist_npArray))
@@ -55,29 +60,41 @@ class Wordspaceprocessing:
             if MissingValue_bol:
                 Indexes_npArray[m_int] = None
                 
-        self.Wordlist_indexes_npArray = Indexes_npArray
+        self.WordlistIndexes_npArray = Indexes_npArray
         
         
-    def neighbors_count(self, v_index, no_neigh=10):
+    def n_neighbors(self, NEIGHBORS_int=10):
         '''
         '''
         
-        
-        dist_vect = np.ones(len(self.WordVectors_npArray), dtype=np.float32)
-        
-        for n, row in enumerate(self.WordVectors_npArray):
+        for VectorIndex_int in self.WordlistIndexes_npArray:
+            DistanceVector_npArray = np.ones(len(self.WordVectors_npArray), 
+                                             dtype=np.float32)
             
-            d = self.cosine_distance(row, self.WordVectors_npArray[v_index])
-        
-            dist_vect[n] = d
-        
-        neighbors_list = []
-        
-        for no in range(no_neigh):
-            neighbors_list.append((dist_vect.argmin(),dist_vect.min()))
-            dist_vect[dist_vect.argmin()] = np.inf
+            for n_int, Vector_npArray in enumerate(self.WordVectors_npArray):
+                
+                Distance_float = self.cosine_distance(Vector_npArray, 
+                                         self.WordVectors_npArray[
+                                                    VectorIndex_int])
             
-        return neighbors_list
+                DistanceVector_npArray[n_int] = Distance_float
+            
+            Neighbors_list = []
+            
+            for NEIGHBOR_int in range(NEIGHBORS_int):
+                
+                MinIndex_int = DistanceVector_npArray.argmin()
+                
+                if MinIndex_int != VectorIndex_int:
+                    Neighbors_list.append(MinIndex_int)
+                
+                DistanceVector_npArray[MinIndex_int] = np.inf
+            
+            if self.ExtraWords_npArray == None:
+                self.ExtraWords_npArray = np.array(Neighbors_list)
+            else:
+                self.ExtraWords_npArray = np.append(self.ExtraWords_npArray, 
+                                                    np.array(Neighbors_list))
     
     
     def cosine_distance(self, v1_npArray, v2_npArray, dtype=np.int32):
@@ -89,3 +106,23 @@ class Wordspaceprocessing:
                                           np.array(v2_npArray, dtype=dtype))
         
         return LocalDist_float
+    
+    
+    def save_subset(self, DirectoryPath_str):
+        '''
+        '''
+        
+        
+        if self.ExtraWords_npArray != None:
+               TotalIndexes_npArray = np.append(self.Wordlist_npArray, 
+                                                self.ExtraWords_npArray)
+        else:
+            totalIndexes_npArray = self.Wordlist_npArray
+            
+        totalIndexes_npArray = np.array(totalIndexes_npArray, dtype = np.int)
+            
+        SubsetVectors_npArray = self.WordVectors_npArray[totalIndexes_npArray]
+        SubsetWords_npArray = self.WordLabels_npArray[TotalIndexes_npArray]
+        
+        np.save(DirectoryPath_str, SubsetVectors_npArray)
+        np.save(DirectoryPath_str, SubsetWords_npArray)
