@@ -8,9 +8,12 @@ from scipy.spatial import distance
 class Wordspaceprocessing:
     def __init__(self,
                  WordVectors_npArray=None, 
-                 WordLabels_npArray=None):
+                 WordLabels_npArray=None,
+                 DebugMode = True):
         '''
         '''
+        
+        self.DebugMode = DebugMode
         
         self.WordVectors_npArray = WordVectors_npArray
         self.WordLabels_npArray = WordLabels_npArray
@@ -59,19 +62,28 @@ class Wordspaceprocessing:
             
             if MissingValue_bol:
                 Indexes_npArray[m_int] = None
-                
-        self.WordlistIndexes_npArray = Indexes_npArray
+        
+        Indexes_npArray = Indexes_npArray[np.logical_not(
+                                        np.isnan(Indexes_npArray))]
+        self.WordlistIndexes_npArray = np.sort(np.array(Indexes_npArray,
+                                                        dtype = np.int32))
+        self.Wordlist_npArray = self.WordLabels_npArray[
+                                        self.WordlistIndexes_npArray]
         
         
     def n_neighbors(self, NEIGHBORS_int=10):
         '''
         '''
+        if self.DebugMode:
+            Length_int = len(self.WordlistIndexes_npArray)
+            Counter_int = 1
         
         for VectorIndex_int in self.WordlistIndexes_npArray:
             DistanceVector_npArray = np.ones(len(self.WordVectors_npArray), 
                                              dtype=np.float32)
             
-            for n_int, Vector_npArray in enumerate(self.WordVectors_npArray):
+            for n_int, Vector_npArray in enumerate(
+                                            self.WordVectors_npArray):
                 
                 Distance_float = self.cosine_distance(Vector_npArray, 
                                          self.WordVectors_npArray[
@@ -93,13 +105,17 @@ class Wordspaceprocessing:
             if self.ExtraWords_npArray == None:
                 self.ExtraWords_npArray = np.array(Neighbors_list)
             else:
-                self.ExtraWords_npArray = np.append(self.ExtraWords_npArray, 
-                                                    np.array(Neighbors_list))
+                self.ExtraWords_npArray = np.append(
+                                        self.ExtraWords_npArray, 
+                                        np.array(Neighbors_list))
+            if self.DebugMode:
+                print(str(Counter_int) + ' of ' + str(Length_int))
+                Counter_int = Counter_int + 1
     
     
     def cosine_distance(self, v1_npArray, v2_npArray, dtype=np.int32):
-        '''
-        '''
+        '''Compute the cosine distance between two vectors
+        and recasts the arrays by chosen data type.'''
         
         
         LocalDist_float = distance.cosine(np.array(v1_npArray, dtype=dtype),
@@ -109,7 +125,7 @@ class Wordspaceprocessing:
     
     
     def save_subset(self, DirectoryPath_str):
-        '''
+        '''Save subsets of the data to file.
         '''
         
         
@@ -117,12 +133,13 @@ class Wordspaceprocessing:
                TotalIndexes_npArray = np.append(self.Wordlist_npArray, 
                                                 self.ExtraWords_npArray)
         else:
-            totalIndexes_npArray = self.Wordlist_npArray
+            TotalIndexes_npArray = self.Wordlist_npArray
             
-        totalIndexes_npArray = np.array(totalIndexes_npArray, dtype = np.int)
+        TotalIndexes_npArray = np.array(np.sort(TotalIndexes_npArray), 
+                                        dtype=np.int32)
             
-        SubsetVectors_npArray = self.WordVectors_npArray[totalIndexes_npArray]
+        SubsetVectors_npArray = self.WordVectors_npArray[TotalIndexes_npArray]
         SubsetWords_npArray = self.WordLabels_npArray[TotalIndexes_npArray]
         
-        np.save(DirectoryPath_str, SubsetVectors_npArray)
-        np.save(DirectoryPath_str, SubsetWords_npArray)
+        np.save(DirectoryPath_str + 'Vectors', SubsetVectors_npArray)
+        np.save(DirectoryPath_str + 'Words', SubsetWords_npArray)
