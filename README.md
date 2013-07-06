@@ -8,6 +8,10 @@ To add a remote repo use:
     git remote add origin url
     git branch --set-upstream master origin/master
     
+To remove a remote branch:
+
+    git push origin --delete <branchName>
+    
 ------
 Code guidelines - PEP 8 -- Style Guide for Python Code:
 http://www.python.org/dev/peps/pep-0008/
