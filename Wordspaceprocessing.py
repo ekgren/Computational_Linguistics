@@ -84,6 +84,8 @@ class Wordspaceprocessing:
     def n_neighbors(self, NEIGHBORS_int=10):
         '''
         '''
+        
+        
         if self.DebugMode_bol:
             Length_int = len(self.WordlistIndexes_npArray)
             Counter_int = 1
@@ -131,7 +133,7 @@ class Wordspaceprocessing:
         and recasts the arrays by chosen data type.'''
         
         
-        LocalDist_float = distance.euclidean(np.array(v1_npArray, dtype=dtype),
+        LocalDist_float = distance.cosine(np.array(v1_npArray, dtype=dtype),
                                           np.array(v2_npArray, dtype=dtype))
         
         return LocalDist_float
