@@ -26,6 +26,11 @@ class Wordspaceprocessing:
         self.TotalIndexes_npArray = None
         
         self.WordFilterValues_npArray = None
+        
+    def add_all_words(self):
+        self.Wordlist_npArray = self.WordLabels_npArray
+        self.WordlistIndexes_npArray = np.arange(len(self.WordVectors_npArray))
+        self.TotalIndexes_npArray = self.WordlistIndexes_npArray
     
     
     def add_wordlist(self, DirectoryPath_str):
@@ -126,12 +131,12 @@ class Wordspaceprocessing:
         and recasts the arrays by chosen data type.'''
         
         
-        LocalDist_float = distance.cosine(np.array(v1_npArray, dtype=dtype),
+        LocalDist_float = distance.euclidean(np.array(v1_npArray, dtype=dtype),
                                           np.array(v2_npArray, dtype=dtype))
         
         return LocalDist_float
     
-    def generate_filter(self, FilterName_str, FilterArgument_number,
+    def generate_filter(self, FilterName_str, FilterArgument_float,
                         DirectoryPath_str, FileName_str):
         '''
         '''
@@ -145,7 +150,7 @@ class Wordspaceprocessing:
             
             for n_int, Index_int in enumerate(self.TotalIndexes_npArray):
                 NeighborCount_npArray[n_int] = self.neighbors_radius(Index_int,
-                                                        FilterArgument_number)
+                                                        FilterArgument_float)
             
             np.save(DirectoryPath_str + FileName_str, NeighborCount_npArray)
             
@@ -156,21 +161,37 @@ class Wordspaceprocessing:
             if self.DebugMode_bol == True:
                 print('Started processing Nth_neighbor filter.')
             
+            Total = len(self.TotalIndexes_npArray)#Change later
+            
             NthNeighborDistance_npArray = np.zeros(
                                                 len(self.TotalIndexes_npArray))
             for n_int, Index_int in enumerate(self.TotalIndexes_npArray):
                 DistanceVector_npArray = self.distance_vector(Index_int)
-                for m_int in range(FilterArgument_number + 1):
+                for m_int in range(FilterArgument_float + 1):
                     DistanceVector_npArray[DistanceVector_npArray.argmin()] = \
                         np.inf
                 NthNeighborDistance_npArray[n_int] = \
                         DistanceVector_npArray.min()
+                #print(str(n_int) + " of " + str(Total))
+                print(NthNeighborDistance_npArray[n_int])
             
             np.save(DirectoryPath_str + FileName_str, 
                     NthNeighborDistance_npArray)
             
             if self.DebugMode_bol == True:
                 print('Done processing Nth_neighbor filter.')
+                
+        if FilterName_str == 'PCA':
+            if self.DebugMode_bol == True:
+                print('Started processing PCA filter.')
+                
+            PCA_npArray = self.PCA()
+            PCA_npArray = PCA_npArray[:, FilterArgument_float]
+            np.save(DirectoryPath_str + FileName_str, PCA_npArray)
+            
+            if self.DebugMode_bol == True:
+                print('Done processing PCA filter.')
+            
             
     def neighbors_radius(self, VectorIndex_int, RADIUS_float):
         '''
@@ -205,6 +226,19 @@ class Wordspaceprocessing:
             DistanceVector_npArray[n_int] = Distance_float
         
         return DistanceVector_npArray
+    
+    
+    def PCA(self):
+        import mdp
+        pca = mdp.nodes.PCANode(svd=True)
+        pca.train(np.array(self.WordVectors_npArray[
+                                            self.WordlistIndexes_npArray],
+                           dtype=np.float32))
+        datap = pca.execute(np.array(
+                    self.WordVectors_npArray[self.WordlistIndexes_npArray],
+                    dtype = np.float32))
+        
+        return datap
 
     
     def save_subset(self, DirectoryPath_str):
