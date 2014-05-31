@@ -61,7 +61,7 @@ class Wordspace_Extraction:
         # Get frequency
         freq = int(line_from_file[3].rstrip()[:-1])
 
-        return dimension, word, base_vector, context_vector, freq
+        return word, base_vector, context_vector, freq
 
     def check_wordlist(self):
         '''Checks if the words in a wordlist is in the wordspace file. Returns 
