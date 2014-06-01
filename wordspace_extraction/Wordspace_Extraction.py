@@ -11,10 +11,15 @@ class Wordspace_Extraction:
 
         self.Wordspace_path = Wordspace_path
         self.Wordspace = None
-
+        
         self.Dimension = 0
         self.Vocabulary = {}
-
+        
+        with open(self.Wordspace_path) as f:
+            line_from_file = f.next().split(" ")
+            self.Dimension = int(line_from_file[1].split(";")[0][2:])
+        
+        
     def extract_vocabulary(self):
         ''' Extracts vocabulary from wordspace.
         '''
