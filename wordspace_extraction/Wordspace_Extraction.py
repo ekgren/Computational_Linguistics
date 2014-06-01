@@ -11,15 +11,16 @@ class Wordspace_Extraction:
 
         self.Wordspace_path = Wordspace_path
         self.Wordspace = None
-        self.Vocabulary = set()
+        self.Vocabulary = {}
 
     def extract_vocabulary(self):
         ''' Extracts vocabulary from wordspace.
         '''
         with open(self.Wordspace_path) as f:
             for line in f:
-                s = line.split(" ")
-                self.Vocabulary.add(s[0][2:-1])
+                line_from_file = line.split(" ")
+                self.Vocabulary[line_from_file[0][2:-1]] = int(
+                    line_from_file[3].rstrip()[:-1])
 
     def extract_vectors_from_line(self, line_from_file):
         '''
@@ -78,8 +79,9 @@ class Wordspace_Extraction:
             for line in f:
                 wordlist.add(line.rstrip())
 
-        wordlist_difference = wordlist.difference(self.Vocabulary)
-        wordlist_intersection = wordlist.intersection(self.Vocabulary)
+        wordlist_difference = wordlist.difference(set(self.Vocabulary.keys()))
+        wordlist_intersection = wordlist.intersection(set(self.Vocabulary
+                                                      .keys()))
 
         return wordlist_difference, wordlist_intersection
 
