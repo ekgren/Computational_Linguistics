@@ -38,10 +38,8 @@ class Wordspace_Extraction:
         line_from_file = line_from_file.split(" ")
         
         # Get dimension of vectors
-        
         dimension = int(line_from_file[1].split(";")[0][2:])
-        #ful kod raden nedan
-        self.Dimension = dimension
+        
         # Get word of vector
         word = line_from_file[0][2:-1]
 
