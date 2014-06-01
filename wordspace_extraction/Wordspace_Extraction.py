@@ -12,7 +12,7 @@ class Wordspace_Extraction:
         self.Wordspace_path = Wordspace_path
         self.Wordspace = None
         self.Vocabulary = set()
-
+        self.Dimension = 0
     def extract_vocabulary(self):
         ''' Extracts vocabulary from wordspace.
         '''
@@ -20,15 +20,19 @@ class Wordspace_Extraction:
             for line in f:
                 s = line.split(" ")
                 self.Vocabulary.add(s[0][2:-1])
-
+        
     def extract_vectors_from_line(self, line_from_file):
         '''
         Takes a line from wordspace file and returns
         the word, the base and context vectors and the words frequency.
         '''
+        line_from_file = line_from_file.split(" ")
+        
         # Get dimension of vectors
+        
         dimension = int(line_from_file[1].split(";")[0][2:])
-
+        #ful kod raden nedan
+        self.Dimension = dimension
         # Get word of vector
         word = line_from_file[0][2:-1]
 
@@ -63,6 +67,7 @@ class Wordspace_Extraction:
                     - int(index[find_minus+1:])
 
         # Get frequency
+        
         freq = int(line_from_file[3].rstrip()[:-1])
 
         return word, base_vector, context_vector, freq
@@ -89,10 +94,39 @@ class Wordspace_Extraction:
             for word in subset:
                 text_file.write(word + '\n')
         
-    def extract_wordlist(self):
+    def extract_wordlist(self, words_path):
         '''Extracts words from a given wordlist to a wordspace_file.
         '''
-        pass
+        wordlist = set()
+        with open(words_path) as wp:
+        
+            nWords = 0
+            
+            for wordLine in wp:
+                wordlist.add(wordLine)
+                nWords = nWords + 1
+            labelVector_npArray = np.zeros(nWords, dtype=np.dtype)
+            contextVector_npArray = np.zeros((nWords,1000), dtype=np.int32)
+            wordNumber = 0
+        wp = wordlist
+            
+        with open(self.Wordspace_path) as ws:
+            
+            for line in ws:
+                line_from_file = line.split(" ")
+                word = line_from_file[0][2:-1]
+                for wordLine in wp:
+                    
+                    if word == wordLine.rstrip():
+                        print(word)
+                        word, base_vector, context_vector, freq = \
+                            self.extract_vectors_from_line(line)
+                        labelVector_npArray[wordNumber] = word
+                        contextVector_npArray[wordNumber] = context_vector
+                        wordNumber = wordNumber + 1
+                            
+                        
+        return labelVector_npArray, contextVector_npArray
         
     def combine(self):
         '''Combines several extracted words into a single file.
