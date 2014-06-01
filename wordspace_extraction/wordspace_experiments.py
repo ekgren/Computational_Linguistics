@@ -12,3 +12,7 @@ difference, intersection = extraction.check_wordlist(allWordsText)
 print(difference)
 print()
 print(intersection)
+
+extraction.pull_wordlist(10, 'data/subset.txt')
+
+# BAJSBAJS

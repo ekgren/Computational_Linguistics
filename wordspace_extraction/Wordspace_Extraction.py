@@ -1,3 +1,4 @@
+import random
 import numpy as np
 
 '''A class for extracting wordspaces from Gavagai.  '''
@@ -81,6 +82,12 @@ class Wordspace_Extraction:
         wordlist_intersection = wordlist.intersection(self.Vocabulary)
 
         return wordlist_difference, wordlist_intersection
+
+    def pull_wordlist(self, size, save_path):
+        subset = random.sample(self.Vocabulary, size)
+        with open(save_path, "w") as text_file:
+            for word in subset:
+                text_file.write(word + '\n')
         
     def extract_wordlist(self):
         '''Extracts words from a given wordlist to a wordspace_file.
