@@ -96,11 +96,14 @@ class Wordspace_Extraction:
 
         return wordlist_difference, wordlist_intersection
 
-    def pull_wordlist(self, size, save_path):
-        subset = random.sample(self.Vocabulary, size)
+    def pull_wordlist(self, size, freq_limit, save_path):
+        word_count = 0
         with open(save_path, "w") as text_file:
-            for word in subset:
-                text_file.write(word + '\n')
+            while word_count < size:
+                current_word = random.choice(self.Vocabulary.keys())
+                if self.Vocabulary[current_word] > freq_limit:
+                    text_file.write(current_word + '\n')
+                    word_count = word_count + 1
         
     def extract_wordlist(self, words_path):
         '''Extracts words from a given wordlist to a wordspace_file.
