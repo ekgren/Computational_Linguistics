@@ -42,7 +42,8 @@ class Wordspace_Extraction:
             else:
                 find_minus = index.find('-')
                 if index.find('-') != -1:
-                    base_vector[int(index[:find_minus])] = - int(index[find_minus+1:])
+                    base_vector[int(index[:find_minus])] = \
+                    - int(index[find_minus+1:])
 
 
         # Get context vector
@@ -52,31 +53,32 @@ class Wordspace_Extraction:
         for index in context_vector_string:
             find_plus = index.find('+')
             if find_plus != -1:
-                context_vector[int(index[:find_plus])] = int(index[find_plus+1:])
+                context_vector[int(index[:find_plus])] = \
+                int(index[find_plus+1:])
             else:
                 find_minus = index.find('-')
                 if index.find('-') != -1:
-                    context_vector[int(index[:find_minus])] = - int(index[find_minus+1:])
+                    context_vector[int(index[:find_minus])] = \
+                    - int(index[find_minus+1:])
 
         # Get frequency
         freq = int(line_from_file[3].rstrip()[:-1])
 
         return word, base_vector, context_vector, freq
 
-    def check_wordlist(self):
+    def check_wordlist(self, words_path):
         '''Checks if the words in a wordlist is in the wordspace file. Returns 
         a list with the words present in the wordspace and a list with the 
         words that are not in the list.  '''
-        with open('C:/Alpha/wordlists/anarchism.txt') as f:
+        with open(words_path) as f:
 
             wordlist = set()
 
             for line in f:
                 wordlist.add(line.rstrip())
 
-        wordlist_difference = wordlist.difference(self.extract_vocabulary())
-        wordlist_intersection = wordlist.intersection(self
-                                                     .extract_vocabulary())
+        wordlist_difference = wordlist.difference(self.Vocabulary)
+        wordlist_intersection = wordlist.intersection(self.Vocabulary)
 
         return wordlist_difference, wordlist_intersection
         
